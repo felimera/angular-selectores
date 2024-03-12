@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import { Observable, of, tap } from 'rxjs';
+import { Observable, map, of, tap } from 'rxjs';
 
-import { Region, SmallCountry } from '../interfaces/country.interface';
+import { Country, Region, SmallCountry } from '../interfaces/country.interface';
 
 @Injectable({ providedIn: 'root' })
 export class CountriesService {
@@ -21,9 +21,13 @@ export class CountriesService {
     if (!region) return of([]);
     const url: string = `${this.baseUrl}/region/${region}?fields=cca3,name,borders`;
     return this.http
-      .get<SmallCountry[]>(url)
+      .get<Country[]>(url)
       .pipe(
-        tap(response => console.log({ response }))
+        map(countries => countries.map(country => ({
+          name: country.name.common,
+          cca3: country.cca3,
+          borders: country.borders ?? []
+        }))),
       );
   }
 }
